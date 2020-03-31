@@ -1,11 +1,12 @@
 from mitmproxy import http
+from mitmproxy import ctx
 import os
 import mimetypes
 
 # Proxy Configuration
 
 # Add hosts from which you want to replace files
-hosts = ['pre-test-online.sbis.ru']
+hosts = ['pre-test-online.sbis.ru', 'online.sbis.ru']
 
 # Add replacement points. Key is a URL part (URL must begin with a given key), values is a path
 # Path can be relative (from current working dir) or absolute
@@ -23,7 +24,8 @@ replacement_locations = sorted(replacements.keys(), reverse=True)
 def request(flow):
     request = flow.request
     if request.pretty_host in hosts:
-        path = request.path
+        components = request.path_components
+        path = '/' + '/'.join(components)
         for prefix in replacement_locations:
             if path.startswith(prefix):
                 target = replacements[prefix]
