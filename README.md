@@ -46,6 +46,10 @@ Instructions for Mac OS X
 Open `local_proxy.py` with your favorite text editor and configure `hosts` and `replacements` variables. 
 See comments for more info.
 
+## Disabling a proxy
+
+Just run ```./proxy_off.sh```. Also you can always disable it using system preferences app.
+
 ## Known bugs
 
 If you already have active Cisco AnyConnect session - disconnect it before starting and configuring mitm.
