@@ -45,4 +45,9 @@ Instructions for Mac OS X
 
 Open `local_proxy.py` with your favorite text editor and configure `hosts` and `replacements` variables. 
 See comments for more info.
+
+## Known bugs
+
+If you already have active Cisco AnyConnect session - disconnect it before starting and configuring mitm.
+Changes made to system proxy settings while AnyConnect session is active will not be used by clients until AnyConnect is disconnected and connected again.  
  
