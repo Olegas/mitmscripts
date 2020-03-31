@@ -1,6 +1,6 @@
 # MiTM Scripts
 
-Scripts form mitmproxy to serve files from local drive
+Scripts frm mitmproxy to serve files from local drive
 
 ## Installing
 
