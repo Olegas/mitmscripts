@@ -5,6 +5,8 @@ import mimetypes
 
 # Proxy Configuration
 
+mimetypes.add_type('text/vnd.wap.wml; charset=utf-8', '.wml')
+
 # Add hosts from which you want to replace files
 hosts = ['pre-test-online.sbis.ru', 'online.sbis.ru']
 
