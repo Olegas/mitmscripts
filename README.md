@@ -26,14 +26,8 @@ Instructions for Mac OS X
     ```
         ./set_proxy.sh
     ```
-    
- 5. Turn it on
- 
-    ```
-        ./proxy_on.sh
-    ```
-    
- 6. Run mitm
+        
+ 5. Run mitm (it will activate proxy, run mitm, and after you quit mitm will deactivate proxy)
  
     ```
         ./run_mitm.sh
