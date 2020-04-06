@@ -40,4 +40,4 @@ def request(flow):
                             'Content-type': mime_type or 'text/plain'
                         })
                 else:
-                    flow.response = http.HTTPResponse.make(404, b"File not found")
+                    flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
