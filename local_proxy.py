@@ -29,8 +29,6 @@ modules = list(set([i.split('/resources/')[1].split('/')[0] for i in replacement
 def request(flow):
     request = flow.request
     if request.pretty_host in hosts:
-        cookies = request.cookies
-        cookies['s3debug'] = ','.join(modules)
         components = request.path_components
         path = '/' + '/'.join(components)
         for prefix in replacement_locations:
@@ -46,3 +44,16 @@ def request(flow):
                         })
                 else:
                     flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
+
+
+def response(flow):
+    request = flow.request
+    if request.pretty_host in hosts:
+        response = flow.response
+        headers = response.headers
+        set_cookie = headers['set-cookie'] if 'set-cookie' in headers else ''
+        all_cookies = list(filter(None, set_cookie.split(',')))
+        all_cookies.append('s3debug={}; Path=/'.format(','.join(modules)))
+        set_cookie = ','.join(all_cookies)
+        response.headers['set-cookie'] = set_cookie
+    pass
