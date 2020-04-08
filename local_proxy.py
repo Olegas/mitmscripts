@@ -19,13 +19,18 @@ replacements = {
 }
 
 # Just change settings above and save script - MITM will reload it automatically
-
 replacement_locations = sorted(replacements.keys(), reverse=True)
+
+# Also, you need not to set debug cookies,
+# this script will analyze modules, you are replacing, and add corresponding cookies to request
+modules = list(set([i.split('/resources/')[1].split('/')[0] for i in replacement_locations]))
 
 
 def request(flow):
     request = flow.request
     if request.pretty_host in hosts:
+        cookies = request.cookies
+        cookies['s3debug'] = ','.join(modules)
         components = request.path_components
         path = '/' + '/'.join(components)
         for prefix in replacement_locations:
