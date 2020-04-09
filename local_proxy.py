@@ -23,7 +23,40 @@ replacement_locations = sorted(replacements.keys(), reverse=True)
 
 # Also, you need not to set debug cookies,
 # this script will analyze modules, you are replacing, and add corresponding cookies to request
+# If you want to turn on debugging for specified module but do not want to replace it, set replacement as None
 modules = list(set([i.split('/resources/')[1].split('/')[0] for i in replacement_locations]))
+
+
+# This script will automagically "create" .json.js files on-the-fly from raw .json i18n dictionaries
+def lang_handler(flow, path, local_file):
+    local_json = local_file.replace('.json.js', '.json')
+    if os.path.exists(local_json):
+        with open(local_json, 'r') as f:
+            module = path.split('/resources/')[1].replace('.json.js', '.json')
+            content = f.read()
+            content = "define('" + module + "',[],function(){return " + content + ";});"
+            mime_type = 'text/javascript; encoding=utf-8'
+            return content, mime_type
+
+    return None, None
+
+
+def default_handler(flow, path, local_file):
+    if os.path.exists(local_file):
+        with open(local_file, 'r') as f:
+            return f.read(), None
+
+    return None, None
+
+
+def full_ext(path):
+    filename = path.split('/')[-1]
+    return '.' + '.'.join(filename.split('.')[1:])
+
+
+handlers = {
+    '.json.js': lang_handler
+}
 
 
 def request(flow):
@@ -34,16 +67,20 @@ def request(flow):
         for prefix in replacement_locations:
             if path.startswith(prefix):
                 target = replacements[prefix]
-                local_file = path.replace(prefix, target)
-                if os.path.exists(local_file):
-                    with open(local_file, 'r') as f:
-                        content = f.read()
-                        mime_type, encoding = mimetypes.guess_type(path)
+                if target:
+                    local_file = path.replace(prefix, target)
+                    extension = full_ext(local_file)
+                    handler = handlers[extension] if extension in handlers else default_handler
+                    content, mime_type = handler(flow, path, local_file)
+
+                    if content is not None:
+                        if mime_type is None:
+                            mime_type, encoding = mimetypes.guess_type(path)
                         flow.response = http.HTTPResponse.make(200, content, {
                             'Content-type': mime_type or 'text/plain'
                         })
-                else:
-                    flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
+                    else:
+                        flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
 
 
 def response(flow):
