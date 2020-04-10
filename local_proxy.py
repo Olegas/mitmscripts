@@ -89,7 +89,7 @@ def response(flow):
         response = flow.response
         headers = response.headers
         all_headers = headers.get_all('set-cookie')
-        all_headers.append('s3debug={}, path=/'.format(','.join(modules)))
+        all_headers.append('s3debug={}; path=/'.format(','.join(modules)))
         headers.set_all('set-cookie', all_headers)
         response.headers = headers
     pass
