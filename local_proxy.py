@@ -88,9 +88,8 @@ def response(flow):
     if request.pretty_host in hosts:
         response = flow.response
         headers = response.headers
-        set_cookie = headers['set-cookie'] if 'set-cookie' in headers else ''
-        all_cookies = list(filter(None, set_cookie.split(',')))
-        all_cookies.append('s3debug={}; Path=/'.format(','.join(modules)))
-        set_cookie = ','.join(all_cookies)
-        response.headers['set-cookie'] = set_cookie
+        all_headers = headers.get_all('set-cookie')
+        all_headers.append('s3debug={}, path=/'.format(','.join(modules)))
+        headers.set_all('set-cookie', all_headers)
+        response.headers = headers
     pass
