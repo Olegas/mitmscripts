@@ -21,19 +21,13 @@ Instructions for Mac OS X
  3. Set desired adapter in `.adapter` file. If you use ethernet connection set `ADAPTER="Ethernet"`, 
     in case WiFi is used - set `ADAPTER="Wi-Fi"`
     
- 4. Configure proxy
- 
-    ```
-        ./set_proxy.sh
-    ```
-        
- 5. Run mitm (it will activate proxy, run mitm, and after you quit mitm will deactivate proxy)
+ 4. Run mitm (it will activate proxy, run mitm, and after you quit mitm will deactivate proxy)
  
     ```
         ./run_mitm.sh
     ```
 
- 7. Point your browser to [mitm.it](http://mitm.it) and follow the instructions how to install certificate to SSL interception
+ 5. Point your browser to [mitm.it](http://mitm.it) and follow the instructions how to install certificate to SSL interception
  
 ## Proxy configuration
 
