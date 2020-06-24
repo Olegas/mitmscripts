@@ -10,6 +10,12 @@ mimetypes.add_type('text/vnd.wap.wml; charset=utf-8', '.wml')
 # Add hosts from which you want to replace files
 hosts = ['pre-test-online.sbis.ru', 'online.sbis.ru']
 
+# Set origin map for Access-Control-Allow-Origin header
+# If request is from %KEY% set header value to %VALUE%
+originMap = {
+    'pre-test-cdn.sbis.ru': 'pre-test-online.sbis.ru'
+}
+
 # Add replacement points. Key is a URL part (URL must begin with a given key), values is a path
 # Path can be relative (from current working dir) or absolute
 # Longest path will be checked first
@@ -77,7 +83,9 @@ def request(flow):
                         if mime_type is None:
                             mime_type, encoding = mimetypes.guess_type(path)
                         flow.response = http.HTTPResponse.make(200, content, {
-                            'Content-type': mime_type or 'text/plain'
+                            'Content-type': mime_type or 'text/plain',
+                            'Access-Control-Allow-Origin': request.scheme + '://' + originMap.get(request.pretty_host, ''),
+                            'Access-Control-Allow-Credentials': 'true'
                         })
                     else:
                         flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
