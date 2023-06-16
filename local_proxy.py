@@ -8,7 +8,7 @@ import mimetypes
 mimetypes.add_type('text/vnd.wap.wml; charset=utf-8', '.wml')
 
 # Add hosts from which you want to replace files
-hosts = ['pre-test-online.sbis.ru', 'online.sbis.ru']
+hosts = ['pre-test-online.sbis.ru', 'test-online.sbis.ru']
 
 # Set origin map for Access-Control-Allow-Origin header
 # If request is from %KEY% set header value to %VALUE%
@@ -20,8 +20,8 @@ originMap = {
 # Path can be relative (from current working dir) or absolute
 # Longest path will be checked first
 replacements = {
-    '/resources/WorkTimeManagementLite/': '../no_backup/core/client/WorkTimeManagementLite/',
-    '/resources/WorkTimeManagementLite/DayInfo': '/Users/oleg/work/no_backup/core/client/WorkTimeManagementLite/DayInfo'
+    '/static/resources/WorkTimeManagementLite/': '../no_backup/core/client/WorkTimeManagementLite/',
+    '/static/resources/WorkTimeManagementLite/DayInfo': '/Users/oleg/work/no_backup/core/client/WorkTimeManagementLite/DayInfo'
 }
 
 # Just change settings above and save script - MITM will reload it automatically
@@ -82,7 +82,7 @@ def request(flow):
                     if content is not None:
                         if mime_type is None:
                             mime_type, encoding = mimetypes.guess_type(path)
-                        flow.response = http.HTTPResponse.make(200, content, {
+                        flow.response = http.Response.make(200, content, {
                             'Content-type': mime_type or 'text/plain',
                             'Access-Control-Allow-Origin': request.scheme + '://' + originMap.get(request.pretty_host, ''),
                             'Access-Control-Allow-Credentials': 'true'
