@@ -1,28 +1,146 @@
-from mitmproxy import http
-from mitmproxy import ctx
-import os
 import mimetypes
+import os
+
+from mitmproxy import http
 
 # Proxy Configuration
 
 mimetypes.add_type('text/vnd.wap.wml; charset=utf-8', '.wml')
 
 # Add hosts from which you want to replace files
-hosts = ['pre-test-online.sbis.ru', 'test-online.sbis.ru']
+hosts = [
+    'online.sbis.ru',
+    'cdn.sbis.ru',
+    'cdn2.sbis.ru'
+]
 
-# Set origin map for Access-Control-Allow-Origin header
-# If request is from %KEY% set header value to %VALUE%
-originMap = {
-    'pre-test-cdn.sbis.ru': 'pre-test-online.sbis.ru'
-}
 
-# Add replacement points. Key is a URL part (URL must begin with a given key), values is a path
-# Path can be relative (from current working dir) or absolute
-# Longest path will be checked first
-replacements = {
-    '/static/resources/WorkTimeManagementLite/': '../no_backup/core/client/WorkTimeManagementLite/',
-    '/static/resources/WorkTimeManagementLite/DayInfo': '/Users/oleg/work/no_backup/core/client/WorkTimeManagementLite/DayInfo'
-}
+class ReplacementBuilder:
+    def __init__(self):
+        self.replacements = {}
+        self.target_folder = ""
+
+    def set_target_folder(self, folder_path):
+        if not os.path.isdir(folder_path):
+            raise ValueError("Provided path is not a valid directory.")
+        if folder_path[-1] == '/':
+            folder_path = folder_path[:-1]
+        self.target_folder = folder_path
+        return self
+
+    def add_debug_module(self, module_name):
+        if not self.target_folder:
+            raise ValueError("Target folder must be set first.")
+        key = f'/static/resources/{module_name}/'
+        value = None
+        self.replacements[key] = value
+        return self
+
+    def add_module_replacement(self, module_name):
+        if not self.target_folder:
+            raise ValueError("Target folder must be set first.")
+        key = f'/static/resources/{module_name}/'
+        value = f'{self.target_folder}/{module_name}/'
+        self.replacements[key] = value
+        return self
+
+    def add_library_replacement(self, module_name, library_name):
+        if not self.target_folder:
+            raise ValueError("Target folder must be set before adding library replacements.")
+
+        lower_lib_name = library_name[0].lower() + library_name[1:]
+
+        key1 = f'/static/resources/{module_name}/_{library_name}/'
+        value1 = f'{self.target_folder}/{module_name}/_{library_name}/'
+        self.replacements[key1] = value1
+
+        key2 = f'/static/resources/{module_name}/{lower_lib_name}.js'
+        value2 = f'{self.target_folder}/{module_name}/{lower_lib_name}.js'
+        self.replacements[key2] = value2
+
+        key3 = f'/static/resources/{module_name}/{lower_lib_name}.css'
+        value3 = f'{self.target_folder}/{module_name}/{lower_lib_name}.css'
+        self.replacements[key3] = value3
+
+        return self
+
+    def add_file_replacement(self, relative_path):
+        key = f'/static/resources/{relative_path}'
+        value = f'{self.target_folder}/{relative_path}'
+        self.replacements[key] = value
+
+    def build(self):
+        if not self.target_folder:
+            raise ValueError("Target folder must be set before building the replacements.")
+        return self.replacements
+
+
+replacements = dict()
+
+b = ReplacementBuilder()
+b.set_target_folder('/Users/olegelifantiev/work/event-calendar/application/')
+# b.add_module_replacement('EmployeeWorkplace')
+b.add_module_replacement('CoreUserCalendar')
+b.add_module_replacement('TodayCalendar')
+b.add_module_replacement('MainUserCalendar')
+b.add_module_replacement('UserCalendarCommon')
+# b.add_library_replacement('CoreUserCalendar', 'usersCalendars')
+# b.add_module_replacement('ServiceAgreementIntegration')
+
+# b.add_debug_module('Events')
+# b.add_debug_module('PEControls')
+# b.add_debug_module('Controls-DataEnv')
+# b.add_debug_module('React')
+# b.add_debug_module('Controls')
+# b.add_debug_module('ExtControls')
+# b.add_debug_module('Controls-Lists')
+# b.add_debug_module('Presto')
+b.add_debug_module('Types')
+b.add_debug_module('EventsMiniCard')
+replacements.update(b.build())
+
+b2 = ReplacementBuilder()
+b2.set_target_folder('/Users/olegelifantiev/work/work-time-mgmt_core/application/')
+# b2.add_library_replacement('WorkTimeManagementBase', 'workDay')
+# b2.add_library_replacement('WorkTimeManagementLite', 'DayTypeChangeMenu')
+# b2.add_library_replacement('WorkTimeManagementLite', 'DayInfo')
+# b2.add_module_replacement('PlanningVacations')
+replacements.update(b2.build())
+
+
+b3 = ReplacementBuilder()
+b3.set_target_folder('/Users/olegelifantiev/work/work-time-mgmt_work-time-planning/application/')
+# b3.add_library_replacement('WorkPlanning', 'workSchedule')
+replacements.update(b3.build())
+
+b4 = ReplacementBuilder()
+b4.set_target_folder('/Users/olegelifantiev/work/wtrules/application')
+b4.add_module_replacement('WTRules')
+replacements.update(b4.build())
+
+b5 = ReplacementBuilder()
+b5.set_target_folder('/Users/olegelifantiev/work/engine_work-time-mgmt/application')
+# b5.add_module_replacement('WTMControls')
+replacements.update(b5.build())
+
+b6 = ReplacementBuilder()
+b6.set_target_folder('/Users/olegelifantiev/work/sbis3-presto/application')
+# b6.add_module_replacement('Presto')
+replacements.update(b6.build())
+
+b7 = ReplacementBuilder()
+b7.set_target_folder('/Users/olegelifantiev/work/booking_core/application')
+# b7.add_module_replacement('EQueueBooking')
+replacements.update(b7.build())
+
+b8 = ReplacementBuilder()
+b8.set_target_folder('/Users/olegelifantiev/work/work-time-mgmt_activity/application')
+# b8.add_module_replacement('WorkTimeRule')
+replacements.update(b8.build())
+
+
+# Set this to True to unpack ALL modules
+full_debug = False
 
 # Just change settings above and save script - MITM will reload it automatically
 replacement_locations = sorted(replacements.keys(), reverse=True)
@@ -32,8 +150,9 @@ replacement_locations = sorted(replacements.keys(), reverse=True)
 # If you want to turn on debugging for specified module but do not want to replace it, set replacement as None
 modules = list(set([i.split('/resources/')[1].split('/')[0] for i in replacement_locations]))
 
-
 # This script will automagically "create" .json.js files on-the-fly from raw .json i18n dictionaries
+
+
 def lang_handler(flow, path, local_file):
     local_json = local_file.replace('.json.js', '.json')
     if os.path.exists(local_json):
@@ -82,13 +201,19 @@ def request(flow):
                     if content is not None:
                         if mime_type is None:
                             mime_type, encoding = mimetypes.guess_type(path)
-                        flow.response = http.Response.make(200, content, {
-                            'Content-type': mime_type or 'text/plain',
-                            'Access-Control-Allow-Origin': request.scheme + '://' + originMap.get(request.pretty_host, ''),
-                            'Access-Control-Allow-Credentials': 'true'
-                        })
+                        origin = request.headers.get('Origin')
+                        headers = {
+                            b'Content-type': (mime_type or 'text/plain').encode('utf-8'),
+                            b'Access-Control-Allow-Credentials': 'true'.encode('utf-8'),
+                            b'X-Source': local_file.encode('utf-8')
+                        }
+                        if origin is not None:
+                            headers.update({
+                                b'Access-Control-Allow-Origin': origin.encode('utf-8'),
+                            })
+                        flow.response = http.Response.make(200, content, headers)
                     else:
-                        flow.response = http.HTTPResponse.make(404, "File not found: " + local_file)
+                        flow.response = http.Response.make(404, "File not found: " + local_file)
 
 
 def response(flow):
@@ -97,7 +222,7 @@ def response(flow):
         response = flow.response
         headers = response.headers
         all_headers = headers.get_all('set-cookie')
-        all_headers.append('s3debug={}; path=/'.format(','.join(modules)))
+        all_headers.append('s3debug={}; path=/'.format('true' if full_debug else ','.join(modules)))
         headers.set_all('set-cookie', all_headers)
         response.headers = headers
     pass
